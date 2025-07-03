@@ -1,0 +1,80 @@
+
+pipeline {
+  agent any
+  tools { 
+    jdk    'jdk'
+    gradle 'gradle'
+  }
+  environment {
+    SONAR_SERVER = 'sqs'
+    REGISTRY = 'kkattlacrjenkins.azurecr.io'              
+    IMAGE    = "${REGISTRY}/schedule_app_kkatl"  
+    TAG      = "${BUILD_NUMBER}-${GIT_COMMIT?.substring(0,7) ?: 'dev'}"
+  }
+
+  stages {
+    stage('Checkout') {
+      steps { checkout scm }
+    }
+
+    stage('Build') {
+      steps {
+        dir('backend/backend') {
+          sh 'gradle clean build --no-daemon'
+        }
+      }
+      post {
+        always {
+          junit 'backend/backend/build/test-results/**/*.xml'
+        }
+      }
+    }
+
+    stage('SonarQube Analysis') {
+      steps {
+        dir('backend/backend') {
+          withCredentials([string(credentialsId: 'sonar', variable: 'SONAR_TOKEN')]) {
+            withSonarQubeEnv("${SONAR_SERVER}") {
+              sh 'gradle sonarqube --no-daemon -Dsonar.login=$SONAR_TOKEN'
+            }
+          }
+        }
+      }
+    }
+
+
+    stage('Quality Gate') {
+      steps {
+        script {
+          def task = sh(
+            script: "curl -s 'http://localhost:9000/api/ce/task?id=${env.SONAR_TASK_ID}'",
+            returnStdout: true
+          )
+        }
+      }
+    }
+
+
+    stage('Docker') {
+      steps {
+        dir('backend/backend') {
+          withCredentials([usernamePassword(
+            credentialsId: 'docker-hub-pat-credentials',
+            usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+            sh '''
+              docker login -u $DOCKER_USER -p $DOCKER_PASS $REGISTRY
+              docker build -f Dockerfile -t $IMAGE:$TAG -t $IMAGE:latest .
+              docker push $IMAGE:$TAG && docker push $IMAGE:latest
+              docker logout $REGISTRY
+            '''
+          }
+        }
+      }
+    }
+  }
+
+  post {
+    success { echo "Done: ${IMAGE}:${TAG}" }
+    failure { echo "Failed – check logs." }
+  }
+}
