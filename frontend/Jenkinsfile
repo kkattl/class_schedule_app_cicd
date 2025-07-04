@@ -83,8 +83,8 @@ pipeline {
 
               az account set --subscription $AZURE_SUBSCRIPTION_ID
 
-              ansible-playbook -i project/ansible/inventory.ini \
-                          project/ansible/frontend_deploy_docker.yml \
+              ansible-playbook -i ../ansible/inventory.ini \
+                          ../ansible/frontend_deploy_docker.yml \
                           --extra-vars "image_tag=${TAG}"
             '''
           }
