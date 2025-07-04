@@ -83,11 +83,6 @@ pipeline {
 
               az account set --subscription $AZURE_SUBSCRIPTION_ID
 
-              echo "=== WORKSPACE DIR ==="
-              pwd
-              echo "=== FIND PLAYBOOK ==="
-              find . -type f -name "frontend_deploy_docker.yml"
-
               ansible-playbook -i ansible/inventory.ini \
                           ansible/deploy_frontend.yml \
                           --extra-vars "image_tag=${TAG}"
