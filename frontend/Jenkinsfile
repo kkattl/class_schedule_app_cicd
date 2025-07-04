@@ -56,15 +56,20 @@ pipeline {
     }
 
      stage('Deploy via Ansible') {
+      environment {
+        PATH = "/opt/homebrew/bin:${env.PATH}"
+      }
       steps {
-          withCredentials([
-            usernamePassword(
-              "PATH=/opt/homebrew/bin:${env.PATH}",
-              credentialsId: 'azure-sp-creds',
-              usernameVariable: 'AZURE_CLIENT_ID',
-              passwordVariable: 'AZURE_CLIENT_SECRET'
-            ),
-            string(credentialsId: 'azure-subscription-id', variable: 'AZURE_SUBSCRIPTION_ID'),
+        withCredentials([
+          usernamePassword(
+          credentialsId: 'azure-sp-creds',
+          usernameVariable: 'AZURE_CLIENT_ID',
+          passwordVariable: 'AZURE_CLIENT_SECRET'
+        ),
+        string(
+          credentialsId: 'azure-subscription-id',
+          variable: 'AZURE_SUBSCRIPTION_ID'
+        )
           ]) {
             sh '''
               az login --service-principal \
