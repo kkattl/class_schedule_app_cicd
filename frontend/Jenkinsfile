@@ -82,7 +82,8 @@ pipeline {
               --tenant $AZURE_TENANT_ID
 
               az account set --subscription $AZURE_SUBSCRIPTION_ID
-
+              
+              ANSIBLE_CONFIG=ansible/ansible.cfg \
               ansible-playbook -i ansible/inventory.ini \
                           ansible/deploy_frontend.yml \
                           --extra-vars "image_tag=${TAG}"
