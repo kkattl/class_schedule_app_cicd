@@ -35,8 +35,10 @@ pipeline {
     }
     stage('Diag: tools') {
     steps {
+      withEnv(["PATH+DOCKER=/Applications/Docker.app/Contents/Resources/bin"]) {  
         sh 'which docker || echo "docker binary not found"'
         sh 'docker --version || true'
+      }
     }
 }
 
