@@ -67,8 +67,12 @@ pipeline {
           passwordVariable: 'AZURE_CLIENT_SECRET'
         ),
         string(
-          string(credentialsId: 'azure-tenant-id',       variable: 'AZURE_TENANT_ID'),
-          string(credentialsId: 'azure-subscription-id', variable: 'AZURE_SUBSCRIPTION_ID')
+          credentialsId: 'azure-tenant-id',
+          variable: 'AZURE_TENANT_ID'
+        ),
+        string(
+          credentialsId: 'azure-subscription-id',
+          variable: 'AZURE_SUBSCRIPTION_ID'
         )
           ]) {
             sh '''
