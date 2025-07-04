@@ -89,7 +89,7 @@ pipeline {
               find . -type f -name "frontend_deploy_docker.yml"
 
               ansible-playbook -i ansible/inventory.ini \
-                          ansible/frontend_deploy_docker.yml \
+                          ansible/deploy_frontend.yml \
                           --extra-vars "image_tag=${TAG}"
             '''
           }
