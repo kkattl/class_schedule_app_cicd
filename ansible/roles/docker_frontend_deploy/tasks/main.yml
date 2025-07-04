@@ -1,0 +1,28 @@
+- name: Log in to Azure Container Registry
+  shell: az acr login --name {{ acr_name }}
+  args:
+    warn: false
+  register: acr_login
+  changed_when: acr_login.rc == 0
+
+- name: Stop and remove existing frontend container if present
+  community.docker.docker_container:
+    name: "{{ container_name }}"
+    state: absent
+    force_kill: true
+
+- name: Pull frontend image from ACR
+  community.docker.docker_image:
+    name: "{{ acr_login_server }}/{{ image_name }}"
+    tag: "{{ image_tag }}"
+    source: pull
+  notify: restart frontend container
+
+- name: Run frontend container
+  community.docker.docker_container:
+    name: "{{ container_name }}"
+    image: "{{ acr_login_server }}/{{ image_name }}:{{ image_tag }}"
+    state: started
+    restart_policy: always
+    ports: "{{ container_ports }}"
+    env: "{{ container_env }}"

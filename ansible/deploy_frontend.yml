@@ -1,0 +1,13 @@
+- name: Open Bastion tunnel
+  hosts: bastion
+  connection: local
+  gather_facts: false 
+  roles:
+    - bastion
+
+- name: Deploy Frontend via ACR image
+  hosts: frontend
+  become: true
+  gather_facts: false
+  roles:
+    - docker_frontend_deploy

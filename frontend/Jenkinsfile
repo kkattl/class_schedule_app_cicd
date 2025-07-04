@@ -1,6 +1,10 @@
 pipeline {
   agent any
-  tools { nodejs 'NodeJs'}       
+  tools 
+  { 
+    nodejs 'NodeJs'
+    ansible 'Ansible'
+  }       
   environment {
     CI = 'true'
     REACT_APP_API_BASE_URL = credentials('api-base-url')
@@ -31,25 +35,52 @@ pipeline {
     }
 
     stage('Docker image') {
-  steps {
-    dir('frontend') {
-      withEnv(["PATH+DOCKER=/Applications/Docker.app/Contents/Resources/bin"]) {        
-        withCredentials([usernamePassword(
-            credentialsId: 'acr-admin-creds',
-            usernameVariable: 'USER',
-            passwordVariable: 'PASS')]) {
+      steps {
+        dir('frontend') {
+          withEnv(["PATH+DOCKER=/Applications/Docker.app/Contents/Resources/bin"]) {        
+            withCredentials([usernamePassword(
+                credentialsId: 'acr-admin-creds',
+                usernameVariable: 'USER',
+                passwordVariable: 'PASS')]) {
 
-          sh '''
-            echo $PASS | docker login $REGISTRY -u $USER --password-stdin
-            docker build -t $IMAGE:$TAG -t $IMAGE:latest -f Dockerfile .
-            docker push  $IMAGE:$TAG
-            docker push  $IMAGE:latest
-          '''
+              sh '''
+                echo $PASS | docker login $REGISTRY -u $USER --password-stdin
+                docker build -t $IMAGE:$TAG -t $IMAGE:latest -f Dockerfile .
+                docker push  $IMAGE:$TAG
+                docker push  $IMAGE:latest
+              '''
+              }
+          }
         }
       }
     }
-  }
-}
+
+     stage('Deploy via Ansible') {
+      steps {
+        sshagent(['vm-ssh-key']) {
+          withCredentials([
+            usernamePassword(
+              credentialsId: 'azure-sp-creds',
+              usernameVariable: 'AZURE_CLIENT_ID',
+              passwordVariable: 'AZURE_CLIENT_SECRET'
+            ),
+            string(credentialsId: 'azure-subscription-id', variable: 'AZURE_SUBSCRIPTION_ID'),
+          ]) {
+            sh '''
+              az login --service-principal \
+                -u $AZURE_CLIENT_ID \
+                -p $AZURE_CLIENT_SECRET \
+                --tenant $AZURE_TENANT_ID
+
+              az account set --subscription $AZURE_SUBSCRIPTION_ID
+
+              ansible-playbook -i project/ansible/inventory.ini \
+                               project/ansible/frontend_deploy_docker.yml \
+                               --extra-vars "image_tag=${TAG}"
+            '''
+          }
+        }
+      }
 
   }
 
