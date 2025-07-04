@@ -34,6 +34,14 @@ pipeline {
       }
     }
 
+    stage('Clean up Docker') {
+    agent { label 'docker-host' }       
+      steps {
+      sh 'docker system prune -a --volumes -f'
+    }
+}
+
+
     stage('Docker image') {
       steps {
         dir('frontend') {
