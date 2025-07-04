@@ -8,7 +8,7 @@ pipeline {
   environment {
     CI = 'true'
     REACT_APP_API_BASE_URL = credentials('api-base-url')
-    REGISTRY = 'kkattlacrjenkins.azurecr.io'              
+    REGISTRY = 'kkattlacrschedule.azurecr.io'              
     IMAGE    = "${REGISTRY}/schedule_app_kkatl"     
     TAG      = "${env.BUILD_NUMBER}-${env.GIT_COMMIT?.substring(0,7) ?: 'dev'}"
   }
@@ -33,6 +33,12 @@ pipeline {
         }
       }
     }
+    stage('Diag: tools') {
+    steps {
+        sh 'which docker || echo "docker binary not found"'
+        sh 'docker --version || true'
+    }
+}
 
     stage('Docker image') {
       steps {
