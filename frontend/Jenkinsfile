@@ -67,20 +67,21 @@ pipeline {
           passwordVariable: 'AZURE_CLIENT_SECRET'
         ),
         string(
-          credentialsId: 'azure-subscription-id',
-          variable: 'AZURE_SUBSCRIPTION_ID'
+          string(credentialsId: 'azure-tenant-id',       variable: 'AZURE_TENANT_ID'),
+          string(credentialsId: 'azure-subscription-id', variable: 'AZURE_SUBSCRIPTION_ID')
         )
           ]) {
             sh '''
               az login --service-principal \
-                -u $AZURE_CLIENT_ID \
-                -p $AZURE_CLIENT_SECRET
+              -u $AZURE_CLIENT_ID \
+              -p $AZURE_CLIENT_SECRET \
+              --tenant $AZURE_TENANT_ID
 
               az account set --subscription $AZURE_SUBSCRIPTION_ID
 
               ansible-playbook -i project/ansible/inventory.ini \
-                               project/ansible/frontend_deploy_docker.yml \
-                               --extra-vars "image_tag=${TAG}"
+                          project/ansible/frontend_deploy_docker.yml \
+                          --extra-vars "image_tag=${TAG}"
             '''
           }
         }
