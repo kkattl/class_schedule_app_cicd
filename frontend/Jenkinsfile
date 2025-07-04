@@ -57,7 +57,6 @@ pipeline {
 
      stage('Deploy via Ansible') {
       steps {
-        sshagent(['vm-ssh-key']) {
           withCredentials([
             usernamePassword(
               credentialsId: 'azure-sp-creds',
@@ -81,7 +80,7 @@ pipeline {
         }
       }
      }
-    }
+    
 
 
   post {
