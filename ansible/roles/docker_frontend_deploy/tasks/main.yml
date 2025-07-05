@@ -1,28 +1,33 @@
-- name: Log in to Azure Container Registry
-  shell: az acr login --name {{ acr_name }}
-  args:
-    warn: false
-  register: acr_login
-  changed_when: acr_login.rc == 0
+- name: Log in to ACR
+  community.docker.docker_login:
+    registry_url: "{{ acr_login_server }}"
+    username:     "{{ acr_username }}"
+    password:     "{{ acr_password }}"
 
-- name: Stop and remove existing frontend container if present
-  community.docker.docker_container:
+- name: Gather existing container info
+  community.docker.docker_container_info:
     name: "{{ container_name }}"
-    state: absent
-    force_kill: true
+  register: existing_container
+  failed_when: false
 
-- name: Pull frontend image from ACR
-  community.docker.docker_image:
-    name: "{{ acr_login_server }}/{{ image_name }}"
-    tag: "{{ image_tag }}"
-    source: pull
-  notify: restart frontend container
-
-- name: Run frontend container
+- name: Stop and remove existing container
   community.docker.docker_container:
-    name: "{{ container_name }}"
-    image: "{{ acr_login_server }}/{{ image_name }}:{{ image_tag }}"
-    state: started
-    restart_policy: always
-    ports: "{{ container_ports }}"
-    env: "{{ container_env }}"
+    name:       "{{ container_name }}"
+    state:      absent
+    force_kill: yes
+  when: existing_container.exists
+
+- name: Pull image from ACR with platform support
+  ansible.builtin.shell: >
+    docker pull --platform linux/amd64 {{ acr_login_server }}/{{ image_name }}:{{ image_tag }}
+
+- name: Run new container
+  community.docker.docker_container:
+    name:           "{{ container_name }}"
+    image:          "{{ acr_login_server }}/{{ image_name }}:{{ image_tag }}"
+    state:          started
+    restart_policy: "{{ restart_policy }}"
+    published_ports:
+      - "{{ host_port }}:{{ container_port }}"
+    env:            "{{ env_vars }}"
+    volumes:        "{{ volumes }}"

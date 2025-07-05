@@ -9,5 +9,7 @@
   hosts: frontend
   become: true
   gather_facts: false
+  collections:
+    - community.docker
   roles:
     - docker_frontend_deploy
