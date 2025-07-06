@@ -81,11 +81,7 @@ pipeline {
 
     
     stage('Docker Build & Push') {
-      when {
-        allOf {
-          branch 'main'
-          changeset 'backend/**'
-        }
+    
       }
       steps {
         dir('backend') {                      
