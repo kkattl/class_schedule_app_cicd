@@ -26,8 +26,7 @@
     name:           "{{ container_name }}"
     image:          "{{ acr_login_server }}/{{ image_name }}:{{ image_tag }}"
     state:          started
-    restart_policy: "{{ restart_policy }}"
-    published_ports:
-      - "{{ host_port }}:{{ container_port }}"
-    env:            "{{ env_vars }}"
-    volumes:        "{{ volumes }}"
+    restart_policy: "{{ restart_policy | default('always') }}"
+    published_ports: "{{ container_ports }}"
+
+

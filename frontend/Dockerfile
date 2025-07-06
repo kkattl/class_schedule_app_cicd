@@ -1,5 +1,3 @@
-# syntax=docker/dockerfile:1.4
-
 FROM --platform=linux/amd64 node:14-alpine AS build-stage
 COPY ./frontend /frontend
 WORKDIR /frontend

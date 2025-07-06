@@ -8,7 +8,7 @@ pipeline {
   environment {
     SONAR_SERVER = 'sqs'
     REGISTRY = 'kkattlacrjenkins.azurecr.io'              
-    IMAGE    = "${REGISTRY}/schedule_app_kkatl"  
+    IMAGE    = "${REGISTRY}/schedule_app_kkattl"  
     TAG      = "${BUILD_NUMBER}-${GIT_COMMIT?.substring(0,7) ?: 'dev'}"
   }
 
@@ -55,18 +55,42 @@ pipeline {
     }
 
 
-    stage('Docker') {
+    
+    stage('Docker Build & Push') {
       steps {
-        dir('backend/backend') {
-          withCredentials([usernamePassword(
-            credentialsId: 'docker-hub-pat-credentials',
-            usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-            sh '''
-              docker login -u $DOCKER_USER -p $DOCKER_PASS $REGISTRY
-              docker build -f Dockerfile -t $IMAGE:$TAG -t $IMAGE:latest .
-              docker push $IMAGE:$TAG && docker push $IMAGE:latest
-              docker logout $REGISTRY
-            '''
+        dir('backend') {                      
+          withEnv(["PATH+DOCKER=/usr/local/bin"]) {
+            withCredentials([
+              usernamePassword(
+                credentialsId: 'acr-admin-creds',
+                usernameVariable: 'ACR_USER',
+                passwordVariable: 'ACR_PASS'
+              ),
+              usernamePassword(
+                credentialsId: 'postgres-creds',
+                usernameVariable: 'DB_USER',
+                passwordVariable: 'DB_PASS'
+              ),
+              string(credentialsId: 'postgres-host', variable: 'DB_HOST'),
+              string(credentialsId: 'redis-host',    variable: 'REDIS_HOST')
+            ]) {
+
+              sh '''
+                echo $ACR_PASS | docker login $REGISTRY -u $ACR_USER --password-stdin
+
+                docker build --platform linux/amd64 \
+                  --build-arg DATABASE=$DB_NAME \
+                  --build-arg USERNAME=$DB_USER \
+                  --build-arg USERPASSWORD=$DB_PASS \
+                  --build-arg POSTGRES_HOST=$DB_HOST \
+                  --build-arg REDIS_HOST=$REDIS_HOST \
+                  -t $IMAGE:$TAG -t $IMAGE:latest \
+                  -f Dockerfile .
+
+                docker push $IMAGE:$TAG
+                docker push $IMAGE:latest
+              '''
+            }
           }
         }
       }

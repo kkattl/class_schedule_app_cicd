@@ -1,17 +1,21 @@
-FROM gradle:6.9.4-jdk11 AS build-stage
+
+FROM --platform=linux/amd64 gradle:6.9.4-jdk11 AS build-stage
 
 COPY ./backend /backend
 
 ARG DATABASE
 ARG USERNAME
 ARG USERPASSWORD
+ARG POSTGRES_HOST
+ARG REDIS_HOST
 
-RUN sed -i "s|hibernate.connection.url=.*|hibernate.connection.url=jdbc:postgresql://postgres:5432/${DATABASE}|" /backend/src/main/resources/hibernate.properties && \
+RUN sed -i "s|hibernate.connection.url=.*|hibernate.connection.url=jdbc:postgresql://${POSTGRES_HOST}:5432/${DATABASE}|" /backend/src/main/resources/hibernate.properties && \
     sed -i "s|hibernate.connection.username=.*|hibernate.connection.username=${USERNAME}|" /backend/src/main/resources/hibernate.properties && \
     sed -i "s|hibernate.connection.password=.*|hibernate.connection.password=${USERPASSWORD}|" /backend/src/main/resources/hibernate.properties && \
+    sed -i "s|redis.address =.*|redis.address = redis://${REDIS_HOST}:6379|" /backend/src/main/resources/cache.properties && \
     cd /backend && gradle build --no-daemon --console=plain
 
-FROM eclipse-temurin:11-jre-alpine AS deploy
+FROM --platform=linux/amd64 eclipse-temurin:11-jre-alpine AS deploy
 
 RUN apk add --no-cache curl && \
     mkdir -p /opt && \
