@@ -73,6 +73,7 @@ pipeline {
               ),
               string(credentialsId: 'postgres-host', variable: 'DB_HOST'),
               string(credentialsId: 'redis-host',    variable: 'REDIS_HOST')
+              string(credentialsId: 'db-name',    variable: 'DB_NAME')
             ]) {
 
               sh '''
