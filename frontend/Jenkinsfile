@@ -9,7 +9,7 @@ pipeline {
     CI = 'true'
     REACT_APP_API_BASE_URL = credentials('api-base-url')
     REGISTRY = 'kkattlacrschedule.azurecr.io'              
-    IMAGE    = "${REGISTRY}/schedule_app_kkatl"     
+    IMAGE    = "${REGISTRY}/schedule_app_kkattl"     
     TAG      = "${env.BUILD_NUMBER}-${env.GIT_COMMIT?.substring(0,7) ?: 'dev'}"
     DOCKER_DEFAULT_PLATFORM = 'linux/amd64'
   }
@@ -47,7 +47,9 @@ pipeline {
 
               sh '''
                 echo $PASS | docker login $REGISTRY -u $USER --password-stdin
-                docker build -t $IMAGE:$TAG -t $IMAGE:latest -f Dockerfile .
+                docker build \
+                  --build-arg REACT_APP_API_BASE_URL=$REACT_APP_API_BASE_URL \
+                  -t $IMAGE:$TAG -t $IMAGE:latest -f Dockerfile .
                 docker push  $IMAGE:$TAG
                 docker push  $IMAGE:latest
               '''
@@ -77,19 +79,16 @@ pipeline {
           variable: 'AZURE_SUBSCRIPTION_ID'
         )
           ]) {
-            sh '''
-              az login --service-principal \
-              -u $AZURE_CLIENT_ID \
-              -p $AZURE_CLIENT_SECRET \
-              --tenant $AZURE_TENANT_ID
-
-              az account set --subscription $AZURE_SUBSCRIPTION_ID
-              
-              ANSIBLE_CONFIG=ansible/ansible.cfg \
-              ansible-playbook -i ansible/inventory.ini \
-                          ansible/deploy_frontend.yml \
-                          --extra-vars "image_tag=${TAG}"
-            '''
+            withCredentials([
+              file(credentialsId: 'ansible-inventory', variable: 'INV_FILE')
+            ]) {
+              sh '''
+                set -e
+                az login --service-principal -u $AZURE_CLIENT_ID -p $AZURE_CLIENT_SECRET --tenant $AZURE_TENANT_ID
+                az account set --subscription $AZURE_SUBSCRIPTION_ID
+                export ANSIBLE_CONFIG=ansible/ansible.cfg
+                ansible-playbook -i "$INV_FILE" ansible/deploy_frontend.yml --extra-vars "image_tag=${TAG}"
+              '''
           }
         }
       }

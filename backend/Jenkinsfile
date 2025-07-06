@@ -8,7 +8,7 @@ pipeline {
   environment {
     SONAR_SERVER = 'sqs'
     REGISTRY = 'kkattlacrschedule.azurecr.io'              
-    IMAGE    = "${REGISTRY}/schedule_app_kkattl"  
+    IMAGE    = "${REGISTRY}/schedule_backend_kkattl"  
     TAG      = "${BUILD_NUMBER}-${GIT_COMMIT?.substring(0,7) ?: 'dev'}"
   }
 
@@ -95,6 +95,41 @@ pipeline {
         }
       }
     }
+
+    stage('Deploy via Ansible') {
+      environment {
+        PATH = "/opt/homebrew/bin:${env.PATH}"
+      }
+      steps {
+        withCredentials([
+          usernamePassword(
+          credentialsId: 'azure-sp-creds',
+          usernameVariable: 'AZURE_CLIENT_ID',
+          passwordVariable: 'AZURE_CLIENT_SECRET'
+        ),
+        string(
+          credentialsId: 'azure-tenant-id',
+          variable: 'AZURE_TENANT_ID'
+        ),
+        string(
+          credentialsId: 'azure-subscription-id',
+          variable: 'AZURE_SUBSCRIPTION_ID'
+        )
+          ]) {
+            withCredentials([
+              file(credentialsId: 'ansible-inventory', variable: 'INV_FILE')
+            ]) {
+              sh '''
+                set -e
+                az login --service-principal -u $AZURE_CLIENT_ID -p $AZURE_CLIENT_SECRET --tenant $AZURE_TENANT_ID
+                az account set --subscription $AZURE_SUBSCRIPTION_ID
+                export ANSIBLE_CONFIG=ansible/ansible.cfg
+                ansible-playbook -i "$INV_FILE" ansible/deploy_backend.yml --extra-vars "image_tag=${TAG}"
+              '''
+          }
+        }
+      }
+     }
   }
 
   post {

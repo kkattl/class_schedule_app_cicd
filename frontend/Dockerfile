@@ -2,8 +2,8 @@ FROM --platform=linux/amd64 node:14-alpine AS build-stage
 COPY ./frontend /frontend
 WORKDIR /frontend
 
-ARG BACKEND_IP
-ENV REACT_APP_API_BASE_URL=http://${BACKEND_IP}:8080/
+ARG REACT_APP_API_BASE_URL
+ENV REACT_APP_API_BASE_URL=$REACT_APP_API_BASE_URL
 
 RUN npm install
 RUN npm run build
