@@ -10,6 +10,7 @@ pipeline {
     REGISTRY = 'kkattlacrjenkins.azurecr.io'              
     IMAGE    = "${REGISTRY}/schedule_app_kkattl"  
     TAG      = "${BUILD_NUMBER}-${GIT_COMMIT?.substring(0,7) ?: 'dev'}"
+    PATH      = "/opt/homebrew/bin:/usr/local/bin:${env.PATH}"
   }
 
   stages {
