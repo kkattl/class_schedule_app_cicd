@@ -128,12 +128,7 @@ pipeline {
     }
 
     stage('Deploy via Ansible') {
-      when {
-        allOf {
-          branch 'main'
-          changeset 'backend/**'
-        }
-      } 
+      
       environment {
         PATH = "/opt/homebrew/bin:${env.PATH}"
       }
