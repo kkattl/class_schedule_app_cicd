@@ -28,5 +28,3 @@
     state:          started
     restart_policy: "{{ restart_policy | default('always') }}"
     published_ports: "{{ container_ports }}"
-
-
