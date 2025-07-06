@@ -10,7 +10,7 @@ pipeline {
     jdk    'jdk'
     gradle 'gradle'
   }
-  
+
   environment {
     SONAR_SERVER = 'sqs'
     REGISTRY = 'kkattlacrschedule.azurecr.io'              
@@ -128,6 +128,12 @@ pipeline {
     }
 
     stage('Deploy via Ansible') {
+      when {
+        allOf {
+          branch 'main'
+          changeset 'backend/**'
+        }
+      } 
       environment {
         PATH = "/opt/homebrew/bin:${env.PATH}"
       }
