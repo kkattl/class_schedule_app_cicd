@@ -1,5 +1,10 @@
 pipeline {
   agent any
+  
+   triggers {
+    pollSCM('H/15 * * * *')
+  }
+
   tools 
   { 
     nodejs 'NodeJs'
@@ -20,14 +25,27 @@ pipeline {
     }
 
     stage('Install') {
+      when {
+        allOf {
+          branch 'main'
+          changeset 'frontend/**'
+        }
+      }
       steps {
         dir('frontend/frontend') {
           sh 'npm install --cache $HOME/.npm --prefer-offline'
         }
       }
     }
+    
 
     stage('Build') {
+      when {
+        allOf {
+          branch 'main'
+          changeset 'frontend/**'
+        }
+      }
       steps {
         dir('frontend/frontend') {
           sh 'npm run build && zip -r build.zip build'
@@ -37,6 +55,12 @@ pipeline {
     
 
     stage('Docker image') {
+      when {
+        allOf {
+          branch 'main'
+          changeset 'frontend/**'
+        }
+      }
       steps {
         dir('frontend') {
           withEnv(["PATH+DOCKER=/usr/local/bin"]) {        
@@ -60,6 +84,12 @@ pipeline {
     }
 
      stage('Deploy via Ansible') {
+      when {
+        allOf {
+          branch 'main'
+          changeset 'frontend/**'
+        }
+      }
       environment {
         PATH = "/opt/homebrew/bin:${env.PATH}"
       }
