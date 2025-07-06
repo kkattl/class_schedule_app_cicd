@@ -6,7 +6,7 @@
     - bastion
 
 - name: Deploy Frontend via ACR image
-  hosts: frontend
+  hosts: backend
   become: true
   gather_facts: false
   collections:
