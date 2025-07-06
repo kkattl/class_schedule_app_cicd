@@ -1,10 +1,16 @@
 
 pipeline {
   agent any
+
+  triggers {
+    pollSCM('H/15 * * * *')
+  }
+
   tools { 
     jdk    'jdk'
     gradle 'gradle'
   }
+  
   environment {
     SONAR_SERVER = 'sqs'
     REGISTRY = 'kkattlacrschedule.azurecr.io'              
@@ -18,6 +24,12 @@ pipeline {
     }
 
     stage('Build') {
+      when {
+        allOf {
+          branch 'main'
+          changeset 'backend/**'
+        }
+      }
       steps {
         dir('backend/backend') {
           sh 'gradle clean build --no-daemon'
@@ -31,6 +43,12 @@ pipeline {
     }
 
     stage('SonarQube Analysis') {
+      when {
+        allOf {
+          branch 'main'
+          changeset 'backend/**'
+        }
+      }
       steps {
         dir('backend/backend') {
           withCredentials([string(credentialsId: 'sonar', variable: 'SONAR_TOKEN')]) {
@@ -44,6 +62,12 @@ pipeline {
 
 
     stage('Quality Gate') {
+      when {
+        allOf {
+          branch 'main'
+          changeset 'backend/**'
+        }
+      }
       steps {
         script {
           def task = sh(
@@ -57,6 +81,12 @@ pipeline {
 
     
     stage('Docker Build & Push') {
+      when {
+        allOf {
+          branch 'main'
+          changeset 'backend/**'
+        }
+      }
       steps {
         dir('backend') {                      
           withEnv(["PATH+DOCKER=/usr/local/bin"]) {
