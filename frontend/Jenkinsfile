@@ -11,6 +11,7 @@ pipeline {
     REGISTRY = 'kkattlacrschedule.azurecr.io'              
     IMAGE    = "${REGISTRY}/schedule_app_kkatl"     
     TAG      = "${env.BUILD_NUMBER}-${env.GIT_COMMIT?.substring(0,7) ?: 'dev'}"
+    DOCKER_DEFAULT_PLATFORM = 'linux/amd64'
   }
 
   stages {
