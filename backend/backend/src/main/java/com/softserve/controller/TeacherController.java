@@ -35,7 +35,7 @@ public class TeacherController {
         this.scheduleService = scheduleService;
     }
 
-    @GetMapping(path = {"/teachers", "/public/teachers"})
+    @GetMapping(path = {"/teachers", "/public/teachers", "/api/public/teachers"})
     @ApiOperation(value = "Get the list of all teachers")
     public ResponseEntity<List<TeacherDTO>> getAll() {
         log.info("Enter into list method");

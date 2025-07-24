@@ -39,7 +39,7 @@ public class SemesterController {
         this.groupService = groupService;
     }
 
-    @GetMapping(path = {"/semesters", "/public/semesters"})
+    @GetMapping(path = {"/semesters", "/public/semesters", "/api/public/semesters"})
     @ApiOperation(value = "Get the list of all semesters")
     public ResponseEntity<List<SemesterWithGroupsDTO>> list() {
         log.info("In list ()");
@@ -63,7 +63,7 @@ public class SemesterController {
         return ResponseEntity.status(HttpStatus.OK).body(semesterMapper.semesterToSemesterWithGroupsDTO(semester));
     }
 
-    @GetMapping("/semesters/default")
+    @GetMapping(path = {"/semesters/default", "/api/semesters/default"})
     @ApiOperation(value = "Get default semester")
     public ResponseEntity<SemesterWithGroupsDTO> getDefault() {
         log.info("In getDefault()");
@@ -128,7 +128,7 @@ public class SemesterController {
         return ResponseEntity.status(HttpStatus.OK).body(semesterMapper.semesterToSemesterWithGroupsDTO(semester));
     }
 
-    @GetMapping("/semesters/current/groups")
+    @GetMapping(path = {"/semesters/current/groups", "/api/semesters/current/groups"})
     @ApiOperation(value = "Get the list of all groups for current semester")
     public ResponseEntity<List<GroupDTO>> getGroupsForCurrentSemester() {
         log.info("In getGroupsForCurrentSemester");
@@ -136,7 +136,7 @@ public class SemesterController {
         return ResponseEntity.status(HttpStatus.OK).body(groupMapper.groupsToGroupDTOs(groups));
     }
 
-    @GetMapping("/semesters/default/groups")
+    @GetMapping(path = {"/semesters/default/groups", "/api/semesters/default/groups"})
     @ApiOperation(value = "Get the list of all groups for default semester")
     public ResponseEntity<List<GroupDTO>> getGroupsForDefaultSemester() {
         log.info("In getGroupsForDefaultSemester");
@@ -144,7 +144,7 @@ public class SemesterController {
         return ResponseEntity.status(HttpStatus.OK).body(groupMapper.groupsToGroupDTOs(groups));
     }
 
-    @GetMapping("/semesters/{semesterId}/groups")
+    @GetMapping(path = {"/semesters/{semesterId}/groups", "/api/semesters/{semesterId}/groups"})
     @ApiOperation(value = "Get the list of all groups for semester by id")
     public ResponseEntity<List<GroupDTO>> getGroupsBySemesterId(@PathVariable Long semesterId) {
         log.info("In getGroupsBySemesterId (semesterId =[{}]", semesterId);

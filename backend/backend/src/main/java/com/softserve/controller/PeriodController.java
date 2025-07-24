@@ -31,7 +31,7 @@ public class PeriodController {
         this.periodMapper = periodMapper;
     }
 
-    @GetMapping(path = {"/classes", "/public/classes"})
+    @GetMapping(path = {"/classes", "/public/classes", "/api/public/classes"})
     @ApiOperation(value = "Get the list of all classes")
     public ResponseEntity<List<PeriodDTO>> list() {
         log.info("Enter into list of PeriodController");

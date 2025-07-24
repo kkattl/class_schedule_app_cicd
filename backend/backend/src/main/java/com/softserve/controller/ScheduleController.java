@@ -21,7 +21,7 @@ import java.util.List;
 @RestController
 @Api(tags = "Schedule API")
 @Slf4j
-@RequestMapping("/schedules")
+@RequestMapping(path = {"/schedules", "/api/schedules"})
 public class ScheduleController {
 
     private final ScheduleService scheduleService;
