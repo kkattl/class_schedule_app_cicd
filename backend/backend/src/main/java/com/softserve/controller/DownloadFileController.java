@@ -25,7 +25,7 @@ import java.util.Locale;
 @AllArgsConstructor
 @RestController
 @Api(tags = "Download files API")
-@RequestMapping("/download")
+@RequestMapping(path = {"/download", "/api/download"})
 @Slf4j
 public class DownloadFileController {
 

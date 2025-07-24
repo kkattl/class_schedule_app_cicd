@@ -72,15 +72,15 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     private static final String DEPARTMENTS_ENDPOINT = "/departments/**";
 
     //PUBLIC ENDPOINTS
-    private static final String SCHEDULE_FOR_USERS_ENDPOINT = "/schedules/full/*";
-    private static final String GROUPS_BY_SEMESTER_ID_PUBLIC_ENDPOINT = "/semesters/{semesterId}/groups";
-    private static final String GROUPS_FOR_CURRENT_SEMESTER_PUBLIC_ENDPOINT = "/semesters/current/groups";
-    private static final String GROUPS_FOR_DEFAULT_SEMESTER_PUBLIC_ENDPOINT = "/semesters/default/groups";
-    private static final String ALL_TEACHERS_PUBLIC_ENDPOINT = "/public/teachers";
-    private static final String ALL_CLASSES_PUBLIC_ENDPOINT = "/public/classes";
-    private static final String ALL_SEMESTERS_PUBLIC_ENDPOINT = "/public/semesters";
-    private static final String DOWNLOAD_SCHEDULE_ENDPOINT = "/download/**";
-    private static final String DEFAULT_SEMESTER_PUBLIC_ENDPOINT = "/semesters/default";
+    private static final String SCHEDULE_FOR_USERS_ENDPOINT = "/api/schedules/full/*";
+    private static final String GROUPS_BY_SEMESTER_ID_PUBLIC_ENDPOINT = "/api/semesters/{semesterId}/groups";
+    private static final String GROUPS_FOR_CURRENT_SEMESTER_PUBLIC_ENDPOINT = "/api/semesters/current/groups";
+    private static final String GROUPS_FOR_DEFAULT_SEMESTER_PUBLIC_ENDPOINT = "/api/semesters/default/groups";
+    private static final String ALL_TEACHERS_PUBLIC_ENDPOINT = "/api/public/teachers";
+    private static final String ALL_CLASSES_PUBLIC_ENDPOINT = "/api/public/classes";
+    private static final String ALL_SEMESTERS_PUBLIC_ENDPOINT = "/api/public/semesters";
+    private static final String DOWNLOAD_SCHEDULE_ENDPOINT = "/api/download/**";
+    private static final String DEFAULT_SEMESTER_PUBLIC_ENDPOINT = "/api/semesters/default";
 
     //FRONTEND ENDPOINTS
     private static final String HOME_ENDPOINT = "/";
